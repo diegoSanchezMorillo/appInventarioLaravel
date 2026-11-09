@@ -10,15 +10,14 @@ use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\AsignacionController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\DashboardController;
 
-Route::get('/', function () {
-    return redirect()->route('login');
-});
 
 Auth::routes(['register' => false]);
 
 Route::middleware('auth')->group(function () {
-    Route::get('/home', [HomeController::class, 'index'])->name('home');
+    Route::get('/', DashboardController::class)->name('dashboard');
+    Route::get('/home', fn () => redirect()->route('dashboard'))->name('home');
 
     Route::resource('productos', ProductoController::class);
     Route::resource('sedes', SedeController::class)->except('show');

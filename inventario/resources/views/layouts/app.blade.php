@@ -33,6 +33,9 @@
                         @auth
                         <!-- Lista de enlaces -->
                             <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">Inicio</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('sedes.*') ? 'active' : '' }}" href="{{ route('sedes.index') }}">Sedes</a>
                             </li>
                             <li class="nav-item">
