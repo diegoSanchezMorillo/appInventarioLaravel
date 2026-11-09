@@ -38,6 +38,9 @@
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('categorias.*') ? 'active' : '' }}" href="{{ route('categorias.index') }}">Categorías</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('trabajadores.*') ? 'active' : '' }}" href="{{ route('trabajadores.index') }}">Trabajadores</a>
+                            </li>
                          @endauth
                     </ul>
 

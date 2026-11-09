@@ -16,8 +16,8 @@ class Asignacion extends Model
         'fecha_entrega'  => 'date',
     ];
 
-    public function producto()       { return $this->belongsTo(Producto::class); }
-    public function trabajador()     { return $this->belongsTo(Trabajador::class); }
+    public function producto()       { return $this->belongsTo(Producto::class)->withTrashed(); }
+    public function trabajador()     { return $this->belongsTo(Trabajador::class)->withTrashed(); }
     public function sedeDevolucion() { return $this->belongsTo(Sede::class, 'sede_devolucion_id'); }
     public function usuario()        { return $this->belongsTo(User::class, 'user_id'); }
 }
