@@ -30,7 +30,11 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav me-auto">
-
+                        @auth
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('sedes.*') ? 'active' : '' }}" href="{{ route('sedes.index') }}">Sedes</a>
+                            </li>
+                         @endauth
                     </ul>
 
                     <!-- Right Side Of Navbar -->
@@ -73,7 +77,25 @@
         </nav>
 
         <main class="py-4">
-            @yield('content')
+            <main class="py-4">
+                <div class="container">
+                    @if (session('success'))
+                        <div class="alert alert-success alert-dismissible fade show">
+                            {{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+                    @if (session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            {{ session('error') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+                </div>
+
+                @yield('content')
+            </main>
+            
         </main>
     </div>
 </body>
