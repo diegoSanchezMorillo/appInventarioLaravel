@@ -21,7 +21,7 @@ return new class extends Migration
             $table->text('descripcion')->nullable();
             $table->string('foto')->nullable();
             $table->foreignId('categoria_id')->constrained('categorias')->restrictOnDelete();
-            $table->foreignId('sede_id')->nullable()->constrained('sedes')->nullOnDelete();
+            $table->foreignId('sede_id')->constrained('sedes')->restrictOnDelete();
             $table->enum('estado', ['disponible', 'asignado', 'reparacion', 'baja'])->default('disponible');
             $table->date('fecha_alta')->nullable();
             $table->timestamps();
