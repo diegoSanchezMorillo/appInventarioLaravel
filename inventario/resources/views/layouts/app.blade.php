@@ -41,6 +41,9 @@
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('trabajadores.*') ? 'active' : '' }}" href="{{ route('trabajadores.index') }}">Trabajadores</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('productos.*') ? 'active' : '' }}" href="{{ route('productos.index') }}">Productos</a>
+                            </li>
                          @endauth
                     </ul>
 

@@ -2,14 +2,29 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Producto extends Model
 {
-     use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes;
+
+    public const ESTADOS = [
+        'disponible' => 'Disponible',
+        'asignado'   => 'Asignado',
+        'reparacion' => 'En reparación',
+        'baja'       => 'De baja',
+    ];
+
+    public const COLORES_ESTADO = [
+        'disponible' => 'success',
+        'asignado'   => 'primary',
+        'reparacion' => 'warning',
+        'baja'       => 'secondary',
+    ];
 
     protected $table = 'productos';
 
@@ -26,7 +41,6 @@ class Producto extends Model
     {
         static::creating(function (Producto $producto) {
             DB::transaction(function () use ($producto) {
-                // Bloquea la categoría para que dos altas a la vez no cojan el mismo número
                 $categoria = Categoria::lockForUpdate()->findOrFail($producto->categoria_id);
                 $categoria->increment('contador');
 
@@ -36,6 +50,8 @@ class Producto extends Model
             $producto->fecha_alta ??= now();
         });
     }
+
+    /* ---------- Relaciones ---------- */
 
     public function categoria()
     {
@@ -55,5 +71,62 @@ class Producto extends Model
     public function asignacionActiva()
     {
         return $this->hasOne(Asignacion::class)->whereNull('fecha_entrega');
+    }
+
+    /* ---------- Ubicación (no se guarda, se calcula) ---------- */
+
+    public function getEstaConTrabajadorAttribute(): bool
+    {
+        return $this->asignacionActiva !== null;
+    }
+
+    public function getUbicacionAttribute(): string
+    {
+        if ($this->esta_con_trabajador) {
+            return $this->asignacionActiva->trabajador->nombre_completo;
+        }
+
+        return $this->sede?->nombre ?? 'Sin ubicación';
+    }
+
+    /* ---------- Estado legible ---------- */
+
+    public function getEstadoTextoAttribute(): string
+    {
+        return self::ESTADOS[$this->estado] ?? $this->estado;
+    }
+
+    public function getEstadoColorAttribute(): string
+    {
+        return self::COLORES_ESTADO[$this->estado] ?? 'light';
+    }
+
+    /* ---------- Scopes para buscar y filtrar ---------- */
+
+    public function scopeBuscar(Builder $query, ?string $texto): Builder
+    {
+        if (blank($texto)) {
+            return $query;
+        }
+
+        return $query->where(function ($q) use ($texto) {
+            $q->where('referencia', 'like', "%{$texto}%")
+              ->orWhere('nombre', 'like', "%{$texto}%")
+              ->orWhere('numero_serie', 'like', "%{$texto}%")
+              ->orWhere('marca', 'like', "%{$texto}%")
+              ->orWhere('modelo', 'like', "%{$texto}%");
+        });
+    }
+
+    // Lo que está físicamente en la sede ahora mismo (no lo tiene nadie)
+    public function scopeEnSede(Builder $query, int $sedeId): Builder
+    {
+        return $query->where('sede_id', $sedeId)->whereDoesntHave('asignacionActiva');
+    }
+
+    // Lo que tiene un trabajador ahora mismo
+    public function scopeConTrabajador(Builder $query, int $trabajadorId): Builder
+    {
+        return $query->whereHas('asignacionActiva', fn ($q) => $q->where('trabajador_id', $trabajadorId));
     }
 }
