@@ -38,7 +38,9 @@
                     ({{ $asignacion->fecha_recogida->diffForHumans() }})
                 </div>
             </div>
-            {{-- Aquí irá el botón "Registrar devolución" en la siguiente fase --}}
+            <a href="{{ route('asignaciones.devolver', $asignacion) }}" class="btn btn-light">
+                Registrar devolución
+            </a>
         </div>
     @else
         <div class="alert alert-success d-flex justify-content-between align-items-center">
@@ -49,7 +51,13 @@
                     <div>{{ $producto->sede->localidad }}</div>
                 @endif
             </div>
-            {{-- Aquí irá el botón "Asignar a trabajador" en la siguiente fase --}}
+            @if ($producto->estado === 'disponible')
+                <a href="{{ route('productos.asignar', $producto) }}" class="btn btn-light">
+                    Asignar a trabajador
+                </a>
+            @else
+                <span class="small">No asignable: {{ $producto->estado_texto }}</span>
+            @endif
         </div>
     @endif
 

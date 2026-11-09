@@ -36,7 +36,7 @@
             </div>
         </div>
 
-        {{-- Productos en su poder --}}
+                {{-- Productos en su poder --}}
         <div class="col-lg-8">
             <div class="card h-100">
                 <div class="card-header fw-semibold">
@@ -51,12 +51,17 @@
                                 <th>Producto</th>
                                 <th>Tipo</th>
                                 <th>Desde</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse ($trabajador->asignacionesActivas as $asignacion)
                                 <tr>
-                                    <td class="font-monospace">{{ $asignacion->producto->referencia }}</td>
+                                    <td>
+                                        <a href="{{ route('productos.show', $asignacion->producto) }}" class="font-monospace text-decoration-none">
+                                            {{ $asignacion->producto->referencia }}
+                                        </a>
+                                    </td>
                                     <td>
                                         {{ $asignacion->producto->nombre }}
                                         <small class="text-muted d-block">{{ $asignacion->producto->categoria->nombre }}</small>
@@ -72,10 +77,13 @@
                                         {{ $asignacion->fecha_recogida->format('d/m/Y') }}
                                         <small class="text-muted d-block">{{ $asignacion->fecha_recogida->diffForHumans() }}</small>
                                     </td>
+                                    <td class="text-end">
+                                        <a href="{{ route('asignaciones.devolver', $asignacion) }}" class="btn btn-sm btn-outline-success">Devolver</a>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted py-4">No tiene ningún producto ahora mismo.</td>
+                                    <td colspan="5" class="text-center text-muted py-4">No tiene ningún producto ahora mismo.</td>
                                 </tr>
                             @endforelse
                         </tbody>

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\TrabajadorController;
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\AsignacionController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -22,4 +23,14 @@ Route::middleware('auth')->group(function () {
     Route::resource('categorias', CategoriaController::class)->except('show');
     Route::resource('trabajadores', TrabajadorController::class)
         ->parameters(['trabajadores' => 'trabajador']);
+
+    Route::get('productos/{producto}/asignar', [AsignacionController::class, 'create'])
+        ->name('productos.asignar');
+    Route::post('productos/{producto}/asignar', [AsignacionController::class, 'store'])
+        ->name('productos.asignar.store');
+
+    Route::get('asignaciones/{asignacion}/devolver', [AsignacionController::class, 'devolverForm'])
+        ->name('asignaciones.devolver');
+    Route::patch('asignaciones/{asignacion}/devolver', [AsignacionController::class, 'devolver'])
+        ->name('asignaciones.devolver.store');
 });
