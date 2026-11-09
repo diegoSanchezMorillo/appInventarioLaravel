@@ -8,6 +8,8 @@ use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\TrabajadorController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\AsignacionController;
+use App\Http\Controllers\PerfilController;
+use App\Http\Controllers\UsuarioController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -33,4 +35,10 @@ Route::middleware('auth')->group(function () {
         ->name('asignaciones.devolver');
     Route::patch('asignaciones/{asignacion}/devolver', [AsignacionController::class, 'devolver'])
         ->name('asignaciones.devolver.store');
+    Route::get('perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
+    Route::put('perfil', [PerfilController::class, 'update'])->name('perfil.update');
+
+    Route::middleware('can:admin')->group(function () {
+        Route::resource('usuarios', UsuarioController::class)->except(['show', 'destroy']);
+    });
 });
