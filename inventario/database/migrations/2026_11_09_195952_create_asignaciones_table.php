@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('asignaciones', function (Blueprint $table) {
             $table->id();
+            // restrictOnDelete: la base de datos impide borrar un producto o un trabajador
+            // que tenga historial de asignaciones
             $table->foreignId('producto_id')->constrained('productos')->restrictOnDelete();
             $table->foreignId('trabajador_id')->constrained('trabajadores')->restrictOnDelete();
             $table->enum('tipo', ['temporal', 'permanente'])->default('temporal');
@@ -23,6 +25,8 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete(); // quién lo registró
             $table->timestamps();
 
+            // Índice para responder rápido a "¿quién tiene ahora este producto?"
+            // (filas de ese producto con fecha_entrega vacía)
             $table->index(['producto_id', 'fecha_entrega']);
         });
     }

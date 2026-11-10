@@ -22,6 +22,8 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
+    // Campos que se pueden rellenar en bloque (User::create([...])).
+    // es_admin: puede gestionar usuarios. activo: si es false, no puede iniciar sesión.
     protected $fillable = [
     'name',
     'email',
@@ -30,10 +32,12 @@ class User extends Authenticatable
     'activo',
     ];
 
+// Conversión automática de tipos al leer/guardar en la base de datos
 protected function casts(): array
 {
     return [
         'email_verified_at' => 'datetime',
+        // "hashed": la contraseña se cifra sola al asignarla, nunca se guarda en texto plano
         'password'          => 'hashed',
         'es_admin'          => 'boolean',
         'activo'            => 'boolean',

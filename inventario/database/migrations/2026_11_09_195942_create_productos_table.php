@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('productos', function (Blueprint $table) {
             $table->id();
+            // Código legible y único (ORD-0001); lo genera el modelo Producto al crearlo
             $table->string('referencia', 20)->unique();
             $table->string('nombre');
             $table->string('marca', 100)->nullable();
@@ -25,6 +26,7 @@ return new class extends Migration
             $table->enum('estado', ['disponible', 'asignado', 'reparacion', 'baja'])->default('disponible');
             $table->date('fecha_alta')->nullable();
             $table->timestamps();
+            // Borrado lógico: al "eliminar" solo se rellena deleted_at, la fila se conserva
             $table->softDeletes();
         });
     }

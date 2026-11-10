@@ -39,6 +39,9 @@ class Producto extends Model
 
     protected static function booted(): void
     {
+        // Al crear un producto se genera su referencia (ej. ORD-0001):
+        // prefijo de la categoría + siguiente número. La categoría se bloquea
+        // (lockForUpdate) para que dos altas simultáneas no obtengan el mismo número.
         static::creating(function (Producto $producto) {
             DB::transaction(function () use ($producto) {
                 $categoria = Categoria::lockForUpdate()->findOrFail($producto->categoria_id);
@@ -68,6 +71,8 @@ class Producto extends Model
         return $this->hasMany(Asignacion::class);
     }
 
+    // La asignación abierta del producto (como mucho una): dice quién lo tiene ahora.
+    // Si es null, el producto está físicamente en su sede.
     public function asignacionActiva()
     {
         return $this->hasOne(Asignacion::class)->whereNull('fecha_entrega');
@@ -118,7 +123,9 @@ class Producto extends Model
         });
     }
 
-    // Lo que está físicamente en la sede ahora mismo (no lo tiene nadie)
+    // Lo que está físicamente en la sede ahora mismo (no lo tiene nadie).
+    // Hacen falta las dos condiciones: un producto asignado conserva su sede_id
+    // como sede de referencia, pero en realidad está con el trabajador.
     public function scopeEnSede(Builder $query, int $sedeId): Builder
     {
         return $query->where('sede_id', $sedeId)->whereDoesntHave('asignacionActiva');

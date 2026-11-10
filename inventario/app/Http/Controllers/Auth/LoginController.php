@@ -25,7 +25,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/home'; // /home reenvía al panel (ver routes/web.php)
 
     /**
      * Create a new controller instance.

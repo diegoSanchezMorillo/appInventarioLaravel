@@ -80,6 +80,8 @@ class ProductoController extends Controller
     {
         $producto->load(['categoria', 'sede', 'asignacionActiva.trabajador.sede']);
 
+        // Historial completo del producto, de la asignación más reciente a la más antigua
+        // (with() carga las relaciones de golpe para evitar una consulta por cada fila)
         $historial = $producto->asignaciones()
             ->with(['trabajador', 'sedeDevolucion'])
             ->latest('fecha_recogida')
@@ -117,6 +119,8 @@ class ProductoController extends Controller
      */
     public function destroy(Producto $producto)
     {
+        // Un producto con historial no se elimina (se perdería la trazabilidad):
+        // se cambia su estado a "De baja". Eliminar solo sirve para altas hechas por error.
         if ($producto->asignaciones()->exists()) {
             return back()->with('error', 'Este producto tiene historial de asignaciones. En lugar de eliminarlo, cambia su estado a "De baja".');
         }

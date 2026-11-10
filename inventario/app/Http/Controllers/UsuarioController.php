@@ -15,6 +15,7 @@ class UsuarioController extends Controller
      */
     public function index()
     {
+        // Primero los usuarios activos y, dentro de cada grupo, por orden alfabético
         $usuarios = User::orderByDesc('activo')->orderBy('name')->paginate(15);
 
         return view('usuarios.index', compact('usuarios'));
@@ -80,6 +81,8 @@ class UsuarioController extends Controller
             $datos['activo']   = $request->boolean('activo');
         }
 
+        // Solo se incluyen en $datos los campos que se van a cambiar:
+        // la contraseña se cambia únicamente si se ha escrito una nueva
         $usuario->update($datos);
 
         // Si se desactiva, se cierran sus sesiones abiertas al momento
@@ -96,6 +99,7 @@ class UsuarioController extends Controller
      */
     public function destroy(User $user)
     {
-        //
+        // Sin implementar a propósito: la ruta está excluida en web.php.
+        // Los usuarios no se borran, se desactivan desde "Editar" (campo "activo").
     }
 }

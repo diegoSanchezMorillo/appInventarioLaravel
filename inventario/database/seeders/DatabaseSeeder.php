@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Usuario administrador inicial. Es solo para desarrollo: en producción
+        // cambia esta contraseña (o crea el admin a mano) antes de usar la aplicación.
         User::create([
             'name'     => 'Administrador',
             'email'    => 'admin@inventario.test',
