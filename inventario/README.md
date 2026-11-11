@@ -1,58 +1,98 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# App de Inventario (Laravel)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplicación web para controlar el material de una entidad con varias sedes: ordenadores, proyectores, ratones y cualquier otro equipo. Permite saber en todo momento **qué hay, dónde está y quién lo tiene**.
 
-## About Laravel
+Desarrollada para uso interno en una entidad con dos sedes, sustituyendo el control manual del material prestado a los trabajadores.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+![Panel de inicio](docs/capturas/dashboard.png)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Funcionalidades
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Panel de resumen**: productos por estado, material en cada sede y fuera de ella, disponibles por categoría, últimos movimientos y alerta de préstamos temporales que superan los días configurados.
+- **Productos**: alta, edición, ficha y baja (borrado lógico). Cada producto recibe una referencia automática según su categoría (`ORD-0001`, `PRY-0002`…). Búsqueda y filtro "¿dónde está?" por sede o trabajador.
+- **Asignaciones**: entrega de un producto a un trabajador (temporal o permanente) y registro de la devolución, que puede hacerse en otra sede y cambiar el estado del producto (por ejemplo, a reparación).
+- **Sedes, categorías y trabajadores**: CRUD completo. Un trabajador no puede darse de baja mientras tenga material asignado.
+- **Usuarios y permisos**: no hay registro público; el administrador crea los usuarios y puede desactivarlos (no se borran). Un usuario desactivado no puede iniciar sesión. Cada usuario edita su propio perfil.
+- **Interfaz en español**, con traducciones de Laravel y mensajes de validación propios.
 
-## Learning Laravel
+## Tecnologías
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+| Capa | Tecnología |
+| --- | --- |
+| Backend | PHP 8.3, Laravel 13 |
+| Autenticación | laravel/ui (login, recuperación de contraseña), Gate `admin` |
+| Base de datos | SQLite por defecto; compatible con MySQL |
+| Frontend | Blade, Bootstrap 5, Vite |
+| Tests | PHPUnit 12 |
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Decisiones técnicas
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+- **Lógica de negocio en un servicio** (`app/Services/AsignacionService.php`): asignar y devolver se ejecutan dentro de una transacción con `lockForUpdate()`, para que dos usuarios no puedan entregar el mismo producto a la vez.
+- **Validación en Form Requests** (`app/Http/Requests`): por ejemplo, la fecha de recogida no puede ser futura ni la de entrega anterior a la de recogida.
+- **Integridad de datos**: claves foráneas con `restrictOnDelete` para no perder el historial, y *soft deletes* en productos y trabajadores.
+- **Referencias automáticas**: al crear un producto, el contador de su categoría se incrementa en una transacción y genera la referencia.
+- **Scopes y accesores en los modelos** (`abiertas()`, `temporales()`, `enSede()`, `ubicacion`, `estado_texto`) para mantener los controladores sencillos.
 
-## Agentic Development
+## Modelo de datos
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```
+sedes ──< productos >── categorias
+  │          │
+  │          └──< asignaciones >── trabajadores >── sedes
+  │                    │
+  └── sede_devolucion ─┘── users (quién registró el movimiento)
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Estados de un producto: `disponible`, `asignado`, `reparacion`, `baja`.
 
-## Contributing
+## Instalación
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Requisitos: PHP 8.3, Composer y Node.js.
 
-## Code of Conduct
+```bash
+git clone https://github.com/diegoSanchezMorillo/appInventarioLaravel.git
+cd appInventarioLaravel/inventario
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+composer install
+npm install
 
-## Security Vulnerabilities
+cp .env.example .env
+php artisan key:generate
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Base de datos SQLite (por defecto)
+touch database/database.sqlite
+php artisan migrate --seed
 
-## License
+npm run build
+php artisan serve
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+La aplicación queda en `http://localhost:8000`. El seeder crea sedes, categorías, trabajadores y productos de ejemplo, además de un usuario administrador (`admin@inventario.test`; la contraseña está en `database/seeders/DatabaseSeeder.php` y conviene cambiarla).
+
+Para usar MySQL, cambia en `.env` las variables `DB_CONNECTION`, `DB_HOST`, `DB_DATABASE`, `DB_USERNAME` y `DB_PASSWORD`.
+
+### Configuración
+
+| Variable | Valor por defecto | Uso |
+| --- | --- | --- |
+| `INVENTARIO_DIAS_ALERTA` | `30` | Días a partir de los cuales un préstamo temporal aparece como alerta en el panel |
+| `APP_LOCALE` | `en` | Pon `es` para la interfaz en español |
+
+## Tests
+
+```bash
+php artisan test
+```
+
+`tests/Feature/AsignacionFlowTest.php` cubre el flujo completo de asignación y devolución con 20 casos, entre ellos:
+
+- No se puede asignar un producto dos veces ni uno que esté en reparación.
+- Un trabajador dado de baja no aparece en el formulario ni puede recibir material.
+- La devolución en otra sede mueve el producto a esa sede y puede marcarlo como averiado.
+- No se puede devolver dos veces ni registrar una recogida anterior a la última devolución.
+- El filtro "¿dónde está?" distingue entre material en sede y material con un trabajador.
+- Las rutas de asignar y devolver exigen haber iniciado sesión.
+
+## Autor
+
+**Diego Sánchez Morillo** · [LinkedIn](https://www.linkedin.com/in/diego-sánchez-morillo-68157a209) · [GitHub](https://github.com/diegoSanchezMorillo)
